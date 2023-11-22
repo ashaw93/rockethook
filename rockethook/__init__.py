@@ -8,7 +8,7 @@ Or you can just Webhook.quick_post('Your message') without bothering with Messag
 """
 
 import json
-import http.client as httplib
+import requests
 import urllib
 from urllib.parse import urlparse
 
@@ -78,27 +78,20 @@ class Webhook(object):
         payload = 'payload=' + urllib.parse.quote_plus(json.dumps(payload_dict))
         headers = {'Content-Type': 'application/x-www-form-urlencoded'}
 
-        if self.scheme == 'https':
-            conn = httplib.HTTPSConnection(self.server_fqdn)
-        else:
-            conn = httplib.HTTPConnection(self.server_fqdn)
-        conn.request('POST', '/hooks/' + self.token, payload, headers)
-        response = conn.getresponse()
-        status = response.status
-        response_data = response.read()
-        conn.close()
+        response = requests.post(f"{self.scheme}://{self.server_fqdn}/hooks/{self.token}", data=payload, headers=headers)
+        status_code = response.status_code
         try:
-            data = json.loads(response_data)
+            data = response.json()
         except:
-            raise WebhookError(response.status, 'Not an API response, check your token.')
-        if status != 200:
+            raise WebhookError(response.status_code, 'Not an API response, check your token.')
+        if status_code != 200:
             if 'error' in data:
                 err_msg = data['error']
             elif 'message' in data:
                 err_msg = data['message']
             else:
                 err_msg = data
-            raise WebhookError(response.status, err_msg)
+            raise WebhookError(response.status_code, err_msg)
 
 
 class Message(object):
