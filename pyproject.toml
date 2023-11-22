@@ -1,0 +1,21 @@
+[project]
+name = "rockethook"
+version = "1.0.5"
+description = "Simple library for posting to Rocket.Chat via webhooks a.k.a. integrations."
+authors = [
+    {name = "Gennady Aleksandrov", email = "gevial@yahoo.com"},
+]
+dependencies = [
+    "setuptools>=69.0.2",
+    "requests>=2.31.0",
+]
+requires-python = ">=3.5"
+readme = "README.md"
+license = { file = "LICENSE" }
+
+[project.urls]
+Homepage = "https://github.com/gevial/rockethook"
+
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
