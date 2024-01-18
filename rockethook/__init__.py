@@ -10,6 +10,7 @@ Or you can just Webhook.quick_post('Your message') without bothering with Messag
 import json
 import requests
 import urllib
+import traceback
 from urllib.parse import urlparse
 
 
@@ -84,21 +85,20 @@ class Webhook(object):
             response = requests.post(f"{self.scheme}://{self.server_fqdn}/hooks/{self.token}", data=payload, headers=headers, timeout=self.send_msg_timeout_sec)
             status_code = response.status_code
             data = response.json()
+            if status_code != 200:
+                if "error" in data:
+                    err_msg = data["error"]
+                elif "message" in data:
+                    err_msg = data["message"]
+                else:
+                    err_msg = data
+                raise WebhookError(response.status_code, err_msg)
         except requests.Timeout:
             raise WebhookError('Timeout while sending Rocket message')
         except requests.ConnectionError:
             raise WebhookError('Unable to connect to Rocket API')
         except:
-            raise WebhookError(response.status_code, 'Not an API response, check your token.')
-        if status_code != 200:
-            if 'error' in data:
-                err_msg = data['error']
-            elif 'message' in data:
-                err_msg = data['message']
-            else:
-                err_msg = data
-            raise WebhookError(response.status_code, err_msg)
-
+            raise WebhookError(f"Unknown exception while sending Rocket message: {traceback.format_exc()}" )
 
 class Message(object):
     """Usage example:
