@@ -39,7 +39,7 @@ class Webhook(object):
     >>> my_hook.quick_post('Hi!')
     >>> my_hook.quick_post('What\'s up?')
     """
-    def __init__(self, server_url, token):
+    def __init__(self, server_url, token, send_msg_timeout_secs: int = 30):
         """ Creates Webhook suitable for posting multiple messages.
 
         server_url should be a valid URL starting with scheme.
@@ -52,6 +52,7 @@ class Webhook(object):
         else:
             self.server_fqdn = parsed.path.split('/')[0]
         self.token = token
+        self.send_msg_timeout_secs = send_msg_timeout_secs
 
     def quick_post(self, text):
         """Method for posting simple text messages."""
@@ -78,10 +79,15 @@ class Webhook(object):
         payload = 'payload=' + urllib.parse.quote_plus(json.dumps(payload_dict))
         headers = {'Content-Type': 'application/x-www-form-urlencoded'}
 
-        response = requests.post(f"{self.scheme}://{self.server_fqdn}/hooks/{self.token}", data=payload, headers=headers)
-        status_code = response.status_code
+
         try:
+            response = requests.post(f"{self.scheme}://{self.server_fqdn}/hooks/{self.token}", data=payload, headers=headers, timeout=self.send_msg_timeout_sec)
+            status_code = response.status_code
             data = response.json()
+        except requests.Timeout:
+            raise WebhookError('Timeout while sending Rocket message')
+        except requests.ConnectionError:
+            raise WebhookError('Unable to connect to Rocket API')
         except:
             raise WebhookError(response.status_code, 'Not an API response, check your token.')
         if status_code != 200:
