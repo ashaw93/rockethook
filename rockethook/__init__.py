@@ -94,11 +94,11 @@ class Webhook(object):
                     err_msg = data
                 raise WebhookError(response.status_code, err_msg)
         except requests.Timeout:
-            raise WebhookError('Timeout while sending Rocket message')
+            raise WebhookError(-1, 'Timeout while sending Rocket message')
         except requests.ConnectionError:
-            raise WebhookError('Unable to connect to Rocket API')
+            raise WebhookError(-1, 'Unable to connect to Rocket API')
         except:
-            raise WebhookError(f"Unknown exception while sending Rocket message: {traceback.format_exc()}" )
+            raise WebhookError(-1, f"Unknown exception while sending Rocket message: {traceback.format_exc()}")
 
 class Message(object):
     """Usage example:
