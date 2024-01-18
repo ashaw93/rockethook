@@ -82,7 +82,7 @@ class Webhook(object):
 
 
         try:
-            response = requests.post(f"{self.scheme}://{self.server_fqdn}/hooks/{self.token}", data=payload, headers=headers, timeout=self.send_msg_timeout_sec)
+            response = requests.post(f"{self.scheme}://{self.server_fqdn}/hooks/{self.token}", data=payload, headers=headers, timeout=self.send_msg_timeout_secs)
             status_code = response.status_code
             data = response.json()
             if status_code != 200:
